@@ -4,11 +4,15 @@ import { ScoreTrendPoint } from '../../../core/api/api.models';
 @Component({
   selector: 'dg-score-trend',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'dg-card block p-6' },
+  host: { class: 'dg-card flex flex-col p-6 lg:p-8' },
   template: `
-    <h2 class="text-sm font-medium text-slate-400">Tendencia</h2>
+    <h2 class="dg-card-title">Tendencia</h2>
     @if (points().length > 1) {
-      <div class="mt-6 flex h-32 items-end gap-1" role="img" [attr.aria-label]="summary()">
+      <div
+        class="mt-6 flex min-h-48 flex-1 items-end gap-1.5"
+        role="img"
+        [attr.aria-label]="summary()"
+      >
         @for (point of points(); track point.calculatedAt) {
           <div
             class="flex-1 rounded-t bg-sky-800 transition hover:bg-sky-600"
@@ -17,12 +21,12 @@ import { ScoreTrendPoint } from '../../../core/api/api.models';
           ></div>
         }
       </div>
-      <p class="mt-3 text-xs text-slate-500">
+      <p class="mt-4 text-sm text-slate-500">
         {{ points().length }} mediciones. Es posible porque los scores se guardan como serie
         histórica y no como un valor que se sobrescribe.
       </p>
     } @else {
-      <p class="mt-4 text-sm text-slate-500">
+      <p class="mt-6 text-sm text-slate-500">
         Hacen falta al menos dos scans para ver una tendencia.
       </p>
     }

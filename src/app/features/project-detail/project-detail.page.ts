@@ -114,13 +114,7 @@ export class ProjectDetailPage implements OnInit {
         error: () => this.trend.set([]),
       });
 
-    this.projectsApi
-      .repositories(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (r) => this.repositories.set(r),
-        error: () => this.repositories.set([]),
-      });
+    this.loadRepositories();
 
     this.scansApi
       .list(id)
@@ -151,11 +145,43 @@ export class ProjectDetailPage implements OnInit {
       });
   }
 
+  protected onRepositoryConnected(): void {
+    this.error.set(null);
+    this.notice.set('Repositorio conectado y autorizado para escanear.');
+    this.loadRepositories();
+  }
+
+  protected revokeRepository(repositoryId: string): void {
+    this.notice.set(null);
+    this.error.set(null);
+
+    this.projectsApi
+      .revokeRepository(repositoryId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          this.repositories.update((list) => list.map((r) => (r.id === updated.id ? updated : r)));
+          this.notice.set(`Autorización revocada para ${updated.fullName}.`);
+        },
+        error: (e) => this.error.set(describeHttpError(e)),
+      });
+  }
+
   protected onFindingUpdated(): void {
     this.notice.set('Hallazgo actualizado. El Security Score se recalculará en el próximo scan.');
     // Los grupos se recargan porque un hallazgo descartado sale de la vista
     // de acciones activas.
     this.loadGroups();
+  }
+
+  private loadRepositories(): void {
+    this.projectsApi
+      .repositories(this.id())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (r) => this.repositories.set(r),
+        error: () => this.repositories.set([]),
+      });
   }
 
   private loadGroups(): void {

@@ -1,6 +1,6 @@
-<header class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+<header class="dg-container flex items-center justify-between py-5">
   <a routerLink="/projects" class="flex items-center gap-2">
-    <span class="text-lg font-semibold tracking-tight">DevGuard</span>
+    <span class="text-xl font-semibold tracking-tight">DevGuard</span>
     <span class="rounded bg-slate-800 px-2 py-0.5 text-xs text-slate-400">
       Security Assessment
     </span>
@@ -12,13 +12,11 @@
         <div class="text-slate-200">{{ displayName() }}</div>
         <div class="text-xs text-slate-500">{{ subtitle() }}</div>
       </div>
-      <button type="button" class="dg-btn-secondary px-3 py-1.5" (click)="auth.logout()">
+      <button type="button" class="dg-btn-secondary px-4 py-2" (click)="auth.logout()">
         Salir
       </button>
     </div>
   } @else if (!auth.unavailable()) {
-    <button type="button" class="dg-btn-primary py-1.5" (click)="auth.login()">
-      Iniciar sesión
-    </button>
+    <button type="button" class="dg-btn-primary py-2" (click)="auth.login()">Iniciar sesión</button>
   }
 </header>

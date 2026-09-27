@@ -32,7 +32,7 @@ import { Alert } from '../../../shared/ui/alert';
     <dialog
       #dialog
       aria-labelledby="review-title"
-      class="w-full max-w-lg rounded-lg border border-slate-800 bg-slate-900 p-6 text-slate-100
+      class="w-full max-w-xl rounded-xl border border-slate-800 bg-slate-900 p-8 text-slate-100
              backdrop:bg-black/70"
       (cancel)="$event.preventDefault(); closed.emit()"
     >
@@ -57,7 +57,7 @@ import { Alert } from '../../../shared/ui/alert';
           }
           <textarea
             name="note"
-            rows="3"
+            rows="4"
             class="dg-input mt-1"
             placeholder="Por qué se descarta o acepta este hallazgo"
             [required]="needsNote()"

@@ -64,6 +64,12 @@ export interface ConnectRepositoryRequest {
   cloneUrl: string;
   defaultBranch?: string;
   visibility?: string;
+  /**
+   * El backend lo exige con @AssertTrue: es la constancia de que el usuario
+   * declara tener derecho a escanear el repositorio. Sale de la casilla que
+   * marca el usuario, nunca se rellena en su nombre.
+   */
+  authorizationConfirmed: boolean;
 }
 
 export interface Scan {

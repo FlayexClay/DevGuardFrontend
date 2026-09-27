@@ -24,11 +24,11 @@ export class ProjectsApi {
   }
 
   connectRepository(projectId: string, body: ConnectRepositoryRequest): Observable<Repository> {
-    // authorizationConfirmed lo exige el backend con @AssertTrue: es la
-    // constancia de que el usuario declara tener derecho a escanear.
-    return this.http.post<Repository>(`/api/projects/${projectId}/repositories`, {
-      ...body,
-      authorizationConfirmed: true,
-    });
+    return this.http.post<Repository>(`/api/projects/${projectId}/repositories`, body);
+  }
+
+  /** Retira la autorizacion de escaneo. No borra el repositorio ni sus scans. */
+  revokeRepository(id: string): Observable<Repository> {
+    return this.http.delete<Repository>(`/api/repositories/${id}/authorization`);
   }
 }

@@ -1,13 +1,13 @@
-<div class="space-y-8">
+<div class="space-y-10">
   <div class="flex items-start justify-between">
     <div>
-      <a routerLink="/projects" class="text-xs text-slate-500 hover:text-slate-300">
+      <a routerLink="/projects" class="text-sm text-slate-500 hover:text-slate-300">
         &larr; Proyectos
       </a>
-      <h1 class="mt-1 text-2xl font-semibold">
+      <h1 class="mt-2 text-3xl font-semibold tracking-tight">
         {{ loading() ? 'Cargando...' : (project()?.name ?? 'Proyecto no disponible') }}
       </h1>
-      <p class="font-mono text-xs text-slate-500">{{ project()?.slug }}</p>
+      <p class="mt-1 font-mono text-sm text-slate-500">{{ project()?.slug }}</p>
     </div>
     <button type="button" class="dg-btn-link" (click)="loadAll()">Actualizar</button>
   </div>
@@ -19,15 +19,19 @@
     <dg-alert kind="info">{{ message }}</dg-alert>
   }
 
-  <div class="grid gap-6 lg:grid-cols-3">
-    <dg-score-card [score]="score()" />
-    <dg-score-trend [points]="trend()" />
-    <dg-authorized-repos
-      [repositories]="repositories()"
-      [scanInProgress]="scanInProgress()"
-      (scanRequested)="requestScan($event)"
-    />
+  <div class="grid gap-6 lg:grid-cols-5 lg:gap-8">
+    <dg-score-card class="lg:col-span-2" [score]="score()" />
+    <dg-score-trend class="lg:col-span-3" [points]="trend()" />
   </div>
+
+  <dg-authorized-repos
+    [projectId]="id()"
+    [repositories]="repositories()"
+    [scanInProgress]="scanInProgress()"
+    (scanRequested)="requestScan($event)"
+    (revokeRequested)="revokeRepository($event)"
+    (connected)="onRepositoryConnected()"
+  />
 
   <dg-remediation-list
     [projectId]="id()"

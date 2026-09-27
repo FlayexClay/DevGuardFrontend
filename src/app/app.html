@@ -1,17 +1,17 @@
 <dg-header />
 
-<main class="mx-auto max-w-6xl px-6 py-8">
+<main class="dg-container py-10 lg:py-12">
   @if (auth.isAuthenticated()) {
     <router-outlet />
   } @else if (auth.unavailable()) {
-    <div class="dg-card p-12 text-center" role="alert">
+    <div class="dg-card p-16 text-center" role="alert">
       <h1 class="text-xl font-semibold">No se pudo contactar con el servicio de identidad</h1>
       <p class="mt-2 text-sm text-slate-400">
         Comprueba que Keycloak está en marcha y recarga la página.
       </p>
     </div>
   } @else {
-    <div class="dg-card p-12 text-center">
+    <div class="dg-card p-16 text-center">
       <h1 class="text-xl font-semibold">Inicia sesión para ver tus proyectos</h1>
       <p class="mt-2 text-sm text-slate-400">
         La autenticación la gestiona Keycloak mediante OAuth2 con PKCE.

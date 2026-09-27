@@ -11,33 +11,33 @@ const MAX_ROWS = 8;
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' },
   template: `
-    <h2 class="text-lg font-semibold">Últimos scans</h2>
-    <div class="mt-4 overflow-hidden rounded-lg border border-slate-800">
+    <h2 class="text-xl font-semibold">Últimos scans</h2>
+    <div class="mt-6 overflow-x-auto rounded-xl border border-slate-800">
       <table class="w-full text-sm">
-        <thead class="bg-slate-900/60 text-left text-xs text-slate-500">
+        <thead class="bg-slate-900/60 text-left text-xs uppercase tracking-wide text-slate-500">
           <tr>
-            <th scope="col" class="px-4 py-2 font-medium">Estado</th>
-            <th scope="col" class="px-4 py-2 font-medium">Commit</th>
-            <th scope="col" class="px-4 py-2 font-medium">Duración</th>
-            <th scope="col" class="px-4 py-2 font-medium">Solicitado</th>
+            <th scope="col" class="px-5 py-3 font-medium">Estado</th>
+            <th scope="col" class="px-5 py-3 font-medium">Commit</th>
+            <th scope="col" class="px-5 py-3 font-medium">Duración</th>
+            <th scope="col" class="px-5 py-3 font-medium">Solicitado</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-800">
           @for (scan of recent(); track scan.id) {
             <tr class="bg-slate-900/20">
-              <td class="px-4 py-2">
+              <td class="px-5 py-3.5">
                 <span [class]="scan.status | scanStatusClass">{{ scan.status }}</span>
                 @if (scan.errorCode) {
                   <span class="ml-2 text-xs text-amber-500">{{ scan.errorCode }}</span>
                 }
               </td>
-              <td class="px-4 py-2 font-mono text-xs text-slate-500">
+              <td class="px-5 py-3.5 font-mono text-sm text-slate-400">
                 {{ scan.commitSha ? scan.commitSha.slice(0, 8) : '—' }}
               </td>
-              <td class="px-4 py-2 text-xs text-slate-400">
+              <td class="px-5 py-3.5 text-sm text-slate-400">
                 {{ scan.durationMs ? (scan.durationMs / 1000 | number: '1.0-0') + ' s' : '—' }}
               </td>
-              <td class="px-4 py-2 text-xs text-slate-500">
+              <td class="px-5 py-3.5 text-sm text-slate-500">
                 {{ scan.requestedAt | date: 'short' }}
               </td>
             </tr>

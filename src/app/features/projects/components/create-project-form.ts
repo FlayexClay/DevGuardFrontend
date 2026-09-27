@@ -16,10 +16,10 @@ import { Alert } from '../../../shared/ui/alert';
   selector: 'dg-create-project-form',
   imports: [FormsModule, Alert],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'dg-card block p-5' },
+  host: { class: 'dg-card block p-6 lg:p-7' },
   template: `
-    <h2 class="text-sm font-medium text-slate-300">Nuevo proyecto</h2>
-    <form class="mt-3 flex flex-col gap-3 sm:flex-row" (ngSubmit)="submit()">
+    <h2 class="dg-card-title">Nuevo proyecto</h2>
+    <form class="mt-4 flex flex-col gap-4 sm:flex-row" (ngSubmit)="submit()">
       <input
         type="text"
         name="name"
@@ -41,7 +41,7 @@ import { Alert } from '../../../shared/ui/alert';
       </button>
     </form>
     @if (error(); as message) {
-      <dg-alert kind="error" class="mt-3">{{ message }}</dg-alert>
+      <dg-alert kind="error" class="mt-4">{{ message }}</dg-alert>
     }
   `,
 })

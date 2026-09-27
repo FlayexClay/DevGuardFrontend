@@ -12,7 +12,7 @@ const KIND_CLASSES: Record<AlertKind, string> = {
   selector: 'dg-alert',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    class: 'block rounded border px-4 py-3 text-sm',
+    class: 'block rounded-lg border px-5 py-3.5 text-sm',
     '[class]': 'kindClass()',
     '[attr.role]': "kind() === 'error' ? 'alert' : 'status'",
   },

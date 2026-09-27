@@ -18,20 +18,32 @@ body {
  * aqui para que un cambio de estilo no obligue a tocar cada template.
  */
 @layer components {
+  .dg-container {
+    @apply mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-10;
+  }
+
   .dg-card {
-    @apply rounded-lg border border-slate-800 bg-slate-900/40;
+    @apply rounded-xl border border-slate-800 bg-slate-900/40;
+  }
+
+  .dg-card-title {
+    @apply text-base font-semibold text-slate-200;
+  }
+
+  .dg-label {
+    @apply block text-sm text-slate-400;
   }
 
   .dg-input {
-    @apply w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm placeholder:text-slate-600 focus:border-sky-600 focus:outline-none;
+    @apply w-full rounded-md border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm placeholder:text-slate-600 focus:border-sky-600 focus:outline-none;
   }
 
   .dg-btn-primary {
-    @apply rounded bg-sky-600 px-4 py-2 text-sm font-medium hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply rounded-md bg-sky-600 px-5 py-2.5 text-sm font-medium hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .dg-btn-secondary {
-    @apply rounded border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply rounded-md border border-slate-700 px-5 py-2.5 text-sm text-slate-300 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .dg-btn-link {
