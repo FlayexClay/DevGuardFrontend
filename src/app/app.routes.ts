@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/auth.guard';
+import { authGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
   {
@@ -12,14 +12,13 @@ export const routes: Routes = [
     canActivate: [authGuard],
     // Carga diferida: el dashboard de un proyecto no hace falta hasta que se
     // entra en uno.
-    loadComponent: () =>
-      import('./pages/projects/projects').then((m) => m.ProjectsPage),
+    loadComponent: () => import('./features/projects/projects.page').then((m) => m.ProjectsPage),
   },
   {
     path: 'projects/:id',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./pages/project-detail/project-detail').then((m) => m.ProjectDetailPage),
+      import('./features/project-detail/project-detail.page').then((m) => m.ProjectDetailPage),
   },
   {
     path: '**',

@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------- build
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
 WORKDIR /build
 
 COPY package*.json ./
@@ -16,5 +16,6 @@ FROM nginx:1.27-alpine
 # Angular 17+ emite a dist/<proyecto>/browser
 COPY --from=build /build/dist/frontend/browser /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY security-headers.conf /etc/nginx/snippets/security-headers.conf
 
 EXPOSE 80

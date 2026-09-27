@@ -1,7 +1,7 @@
 import { AuthConfig } from 'angular-oauth2-oidc';
-import { APP_CONFIG } from './app-config';
+import { environment } from '../../../environments/environment';
 
-const { url, realm, clientId } = APP_CONFIG.keycloak;
+const { url, realm, clientId } = environment.keycloak;
 
 export const authConfig: AuthConfig = {
   issuer: `${url}/realms/${realm}`,
@@ -14,14 +14,15 @@ export const authConfig: AuthConfig = {
   responseType: 'code',
   scope: 'openid profile email',
 
-  // Solo para desarrollo local. En AWS, con HTTPS, hay que quitarlo: dejarlo
-  // permitiria que el token viajara en claro sin que nada avise.
-  requireHttps: false,
+  // HTTP solo se admite contra localhost. Cualquier otro host exige HTTPS, asi
+  // que un despliegue sin TLS falla de forma visible en lugar de dejar viajar
+  // el token en claro.
+  requireHttps: 'remoteOnly',
 
-  // Renovacion silenciosa: el token dura 15 minutos y un scan puede tardar
-  // mas. Sin esto, el usuario se queda sin sesion mirando un scan en curso.
+  // El token dura 15 minutos y un scan puede tardar mas. AuthService activa la
+  // renovacion automatica; con useSilentRefresh = false se hace con el
+  // refresh token del flujo code, sin el iframe oculto de silent refresh.
   useSilentRefresh: false,
-  silentRefreshTimeout: 5000,
   timeoutFactor: 0.75,
 
   showDebugInformation: false,

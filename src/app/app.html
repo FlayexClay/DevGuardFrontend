@@ -1,49 +1,21 @@
-<div class="min-h-screen bg-slate-950 text-slate-100">
-  <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur">
-    <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-      <a routerLink="/projects" class="flex items-center gap-2">
-        <span class="text-lg font-semibold tracking-tight">DevGuard</span>
-        <span class="rounded bg-slate-800 px-2 py-0.5 text-xs text-slate-400">
-          Security Assessment
-        </span>
-      </a>
+<dg-header />
 
-      @if (auth.isAuthenticated()) {
-        <div class="flex items-center gap-4 text-sm">
-          <div class="text-right">
-            <div class="text-slate-200">{{ auth.user()?.name ?? auth.user()?.email }}</div>
-            <div class="text-xs text-slate-500">
-              {{ auth.user()?.organization }} · {{ auth.user()?.roles?.join(', ') }}
-            </div>
-          </div>
-          <button
-            type="button"
-            class="rounded border border-slate-700 px-3 py-1.5 text-slate-300 hover:bg-slate-800"
-            (click)="auth.logout()">
-            Salir
-          </button>
-        </div>
-      } @else {
-        <button
-          type="button"
-          class="rounded bg-sky-600 px-4 py-1.5 text-sm font-medium hover:bg-sky-500"
-          (click)="auth.login()">
-          Iniciar sesion
-        </button>
-      }
+<main class="mx-auto max-w-6xl px-6 py-8">
+  @if (auth.isAuthenticated()) {
+    <router-outlet />
+  } @else if (auth.unavailable()) {
+    <div class="dg-card p-12 text-center" role="alert">
+      <h1 class="text-xl font-semibold">No se pudo contactar con el servicio de identidad</h1>
+      <p class="mt-2 text-sm text-slate-400">
+        Comprueba que Keycloak está en marcha y recarga la página.
+      </p>
     </div>
-  </header>
-
-  <main class="mx-auto max-w-6xl px-6 py-8">
-    @if (auth.isAuthenticated()) {
-      <router-outlet />
-    } @else {
-      <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-12 text-center">
-        <h1 class="text-xl font-semibold">Inicia sesion para ver tus proyectos</h1>
-        <p class="mt-2 text-sm text-slate-400">
-          La autenticacion la gestiona Keycloak mediante OAuth2 con PKCE.
-        </p>
-      </div>
-    }
-  </main>
-</div>
+  } @else {
+    <div class="dg-card p-12 text-center">
+      <h1 class="text-xl font-semibold">Inicia sesión para ver tus proyectos</h1>
+      <p class="mt-2 text-sm text-slate-400">
+        La autenticación la gestiona Keycloak mediante OAuth2 con PKCE.
+      </p>
+    </div>
+  }
+</main>

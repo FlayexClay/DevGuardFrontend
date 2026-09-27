@@ -2,38 +2,65 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { authConfig } from './auth.config';
 
+export type Role = 'ADMIN' | 'SECURITY_ANALYST' | (string & {});
+
 export interface SessionUser {
   subject: string;
   email: string | null;
   name: string | null;
   organization: string | null;
-  roles: string[];
+  roles: Role[];
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly oauth = inject(OAuthService);
   private readonly userSignal = signal<SessionUser | null>(null);
+  private readonly unavailableSignal = signal(false);
 
   readonly user = this.userSignal.asReadonly();
   readonly isAuthenticated = computed(() => this.userSignal() !== null);
 
-  /** Roles que pueden cambiar el estado de un hallazgo. */
-  readonly canManageFindings = computed(() => {
-    const roles = this.userSignal()?.roles ?? [];
-    return roles.includes('ADMIN') || roles.includes('SECURITY_ANALYST');
-  });
+  /** El proveedor de identidad no respondio al arrancar. */
+  readonly unavailable = this.unavailableSignal.asReadonly();
 
-  readonly isAdmin = computed(() => this.userSignal()?.roles.includes('ADMIN') ?? false);
+  /** Roles que pueden cambiar el estado de un hallazgo. */
+  readonly canManageFindings = computed(() => this.hasAnyRole('ADMIN', 'SECURITY_ANALYST'));
+
+  readonly isAdmin = computed(() => this.hasAnyRole('ADMIN'));
 
   async init(): Promise<void> {
     this.oauth.configure(authConfig);
     this.oauth.setupAutomaticSilentRefresh();
 
+    // Los claims se releen con cada token nuevo, y la sesion se cierra en la
+    // interfaz si la renovacion falla: si no, se seguiria mostrando un usuario
+    // cuyas peticiones ya reciben 401.
+    this.oauth.events.subscribe((event) => {
+      switch (event.type) {
+        case 'token_received':
+        case 'token_refreshed':
+          this.readClaims();
+          break;
+        case 'token_refresh_error':
+        case 'session_terminated':
+        case 'logout':
+          this.userSignal.set(null);
+          break;
+      }
+    });
+
     // loadDiscoveryDocumentAndTryLogin resuelve el retorno del proveedor: si
     // la URL trae el code, lo canjea; si no, simplemente no hay sesion.
-    await this.oauth.loadDiscoveryDocumentAndTryLogin();
-    this.readClaims();
+    // Si Keycloak no responde, la app arranca igual y lo indica, en lugar de
+    // quedarse en blanco por un inicializador que lanza.
+    try {
+      await this.oauth.loadDiscoveryDocumentAndTryLogin();
+      this.readClaims();
+    } catch (e) {
+      console.error('No se pudo contactar con el proveedor de identidad', e);
+      this.unavailableSignal.set(true);
+    }
   }
 
   login(): void {
@@ -47,6 +74,11 @@ export class AuthService {
 
   get accessToken(): string | null {
     return this.oauth.hasValidAccessToken() ? this.oauth.getAccessToken() : null;
+  }
+
+  private hasAnyRole(...roles: Role[]): boolean {
+    const current = this.userSignal()?.roles ?? [];
+    return roles.some((r) => current.includes(r));
   }
 
   /**
@@ -64,7 +96,7 @@ export class AuthService {
     }
 
     const claims = this.oauth.getIdentityClaims() as Record<string, unknown> | null;
-    const accessClaims = this.decodeAccessToken();
+    const accessClaims = decodeJwtPayload(this.oauth.getAccessToken());
 
     const realmAccess = accessClaims?.['realm_access'] as { roles?: string[] } | undefined;
 
@@ -76,27 +108,23 @@ export class AuthService {
       roles: realmAccess?.roles ?? [],
     });
   }
+}
 
-  /**
-   * organization_id y los roles viajan en el access token, no en el id token,
-   * asi que hay que decodificarlo a mano. Solo se lee el payload: la firma la
-   * valida el backend, que es quien debe hacerlo.
-   */
-  private decodeAccessToken(): Record<string, unknown> | null {
-    const token = this.oauth.getAccessToken();
-    if (!token) {
-      return null;
-    }
-    try {
-      const payload = token.split('.')[1];
-      const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
-      const padded = normalized.padEnd(
-        normalized.length + ((4 - (normalized.length % 4)) % 4),
-        '=',
-      );
-      return JSON.parse(atob(padded));
-    } catch {
-      return null;
-    }
+/**
+ * organization_id y los roles viajan en el access token, no en el id token,
+ * asi que hay que decodificarlo a mano. Solo se lee el payload: la firma la
+ * valida el backend, que es quien debe hacerlo.
+ */
+function decodeJwtPayload(token: string | null): Record<string, unknown> | null {
+  if (!token) {
+    return null;
+  }
+  try {
+    const payload = token.split('.')[1];
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
+    return JSON.parse(atob(padded));
+  } catch {
+    return null;
   }
 }

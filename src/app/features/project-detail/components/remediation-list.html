@@ -1,0 +1,122 @@
+<h2 class="text-lg font-semibold">Qué arreglar primero</h2>
+<p class="mt-1 text-sm text-slate-400">
+  Cada fila es una acción, no un hallazgo: actualizar una dependencia puede cerrar decenas de
+  vulnerabilidades a la vez.
+</p>
+
+@if (groups().length === 0) {
+  <div class="dg-card mt-4 p-10 text-center">
+    <p class="text-slate-400">Sin hallazgos activos</p>
+  </div>
+} @else {
+  <ul class="mt-4 space-y-2">
+    @for (group of groups(); track group.remediationKey) {
+      @let expanded = expandedKey() === group.remediationKey;
+      <li class="dg-card overflow-hidden">
+        <button
+          type="button"
+          class="flex w-full items-start gap-4 p-4 text-left hover:bg-slate-900/80"
+          [attr.aria-expanded]="expanded"
+          (click)="toggle(group)"
+        >
+          <dg-severity-badge class="mt-0.5" [severity]="group.severity" />
+
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-sm font-medium text-slate-100">{{ group.title }}</p>
+            <p class="mt-1 truncate font-mono text-xs text-slate-500">
+              {{ group.packageName ?? group.filePath }}
+            </p>
+
+            @if (group.findingCount > 1) {
+              <p class="mt-2 text-xs text-slate-400">
+                <span class="font-medium text-slate-300">{{ group.findingCount }} hallazgos</span>
+                que se cierran con esta única acción
+                @if (group.criticalCount > 0) {
+                  · <span class="text-red-400">{{ group.criticalCount }} crítica</span>
+                }
+              </p>
+            }
+
+            @if (group.installedVersion && group.fixedVersions) {
+              <p class="mt-2 text-xs text-slate-400">
+                Versión instalada
+                <code class="text-slate-300">{{ group.installedVersion }}</code
+                >. Corregida en
+                <code class="text-emerald-400">{{ group.fixedVersions }}</code>
+              </p>
+            }
+
+            @if (group.hasRegression) {
+              <p class="mt-2 text-xs text-amber-400">Reapareció después de haberse resuelto</p>
+            }
+          </div>
+
+          <span class="shrink-0 text-xs text-slate-600" aria-hidden="true">
+            {{ expanded ? '−' : '+' }}
+          </span>
+        </button>
+
+        @if (expanded) {
+          <div class="border-t border-slate-800 bg-slate-950/60 p-4">
+            @switch (findingsState()) {
+              @case ('loading') {
+                <p class="text-xs text-slate-500">Cargando hallazgos...</p>
+              }
+              @case ('error') {
+                <p class="text-xs text-red-300" role="alert">{{ findingsError() }}</p>
+              }
+              @default {
+                @if (findings().length === 0) {
+                  <p class="text-xs text-slate-500">Este grupo no tiene hallazgos visibles.</p>
+                } @else {
+                  <ul class="space-y-2">
+                    @for (finding of findings(); track finding.id) {
+                      <li
+                        class="flex items-start gap-3 rounded border border-slate-800 bg-slate-900/40 p-3"
+                      >
+                        <dg-severity-badge size="xs" [severity]="finding.severity" />
+
+                        <div class="min-w-0 flex-1 text-xs">
+                          <p class="text-slate-300">{{ finding.title }}</p>
+                          <p class="mt-1 font-mono text-slate-600">
+                            {{ finding | findingLocation }}
+                          </p>
+                          @if (finding.evidence) {
+                            <p class="mt-1 font-mono text-slate-500">
+                              Evidencia: {{ finding.evidence }}
+                            </p>
+                          }
+                          @if (finding.status !== 'OPEN') {
+                            <p class="mt-1 text-slate-400">Estado: {{ finding.status }}</p>
+                          }
+                        </div>
+
+                        @if (auth.canManageFindings() && finding.status === 'OPEN') {
+                          <button
+                            type="button"
+                            class="dg-btn-secondary shrink-0 px-2 py-1 text-[10px]"
+                            (click)="reviewing.set(finding)"
+                          >
+                            Revisar
+                          </button>
+                        }
+                      </li>
+                    }
+                  </ul>
+                }
+              }
+            }
+          </div>
+        }
+      </li>
+    }
+  </ul>
+}
+
+@if (reviewing(); as finding) {
+  <dg-finding-review-dialog
+    [finding]="finding"
+    (saved)="onReviewSaved($event)"
+    (closed)="reviewing.set(null)"
+  />
+}

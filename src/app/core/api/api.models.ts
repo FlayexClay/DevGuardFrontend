@@ -7,6 +7,35 @@
  * avisar de un campo que el servidor renombro.
  */
 
+export const SEVERITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'] as const;
+export type Severity = (typeof SEVERITIES)[number];
+
+/** Espejo de ScanStatus del backend. */
+export type ScanStatus = 'REQUESTED' | 'QUEUED' | 'RUNNING' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
+
+/** Estados en los que un scan todavia no ha terminado. */
+export const ACTIVE_SCAN_STATUSES: readonly ScanStatus[] = ['REQUESTED', 'QUEUED', 'RUNNING'];
+
+/** Espejo de FindingStatus del backend. */
+export type FindingStatus =
+  'OPEN' | 'CONFIRMED' | 'FALSE_POSITIVE' | 'ACCEPTED_RISK' | 'RESOLVED' | 'REGRESSED';
+
+/** Decisiones que ofrece el dialogo de revision de un hallazgo abierto. */
+export type ReviewDecision = Extract<
+  FindingStatus,
+  'FALSE_POSITIVE' | 'ACCEPTED_RISK' | 'CONFIRMED'
+>;
+
+/**
+ * Decisiones que exigen nota. El backend las rechaza con 400 si falta: un
+ * descarte sin justificacion es indistinguible de alguien silenciando un
+ * problema.
+ */
+export const DECISIONS_REQUIRING_NOTE: readonly ReviewDecision[] = [
+  'FALSE_POSITIVE',
+  'ACCEPTED_RISK',
+];
+
 export interface Project {
   id: string;
   name: string;
@@ -29,11 +58,19 @@ export interface Repository {
   createdAt: string;
 }
 
+export interface ConnectRepositoryRequest {
+  provider: string;
+  fullName: string;
+  cloneUrl: string;
+  defaultBranch?: string;
+  visibility?: string;
+}
+
 export interface Scan {
   id: string;
   projectId: string;
   repositoryId: string | null;
-  status: string;
+  status: ScanStatus;
   triggerType: string;
   branch: string | null;
   commitSha: string | null;
@@ -82,7 +119,7 @@ export interface ScoreTrendPoint {
 export interface RemediationGroup {
   remediationKey: string;
   title: string;
-  severity: string;
+  severity: Severity;
   category: string;
   priority: number | null;
   /** Cuantos hallazgos cierra esta unica accion. */
@@ -106,7 +143,7 @@ export interface RemediationGroup {
 export interface Finding {
   id: string;
   category: string;
-  severity: string;
+  severity: Severity;
   title: string;
   description: string | null;
   recommendation: string | null;
@@ -123,12 +160,18 @@ export interface Finding {
   packageName: string | null;
   installedVersion: string | null;
   fixedVersion: string | null;
-  status: string;
+  status: FindingStatus;
   validationState: string;
   priority: number | null;
   remediationKey: string;
   firstSeenAt: string;
   lastSeenAt: string;
+}
+
+export interface FindingFilters {
+  severity?: Severity;
+  category?: string;
+  status?: FindingStatus;
 }
 
 export interface FindingPage {
@@ -137,6 +180,3 @@ export interface FindingPage {
   page: number;
   size: number;
 }
-
-export const SEVERITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'] as const;
-export type Severity = (typeof SEVERITIES)[number];

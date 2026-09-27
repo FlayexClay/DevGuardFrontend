@@ -5,21 +5,23 @@ import {
   inject,
 } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideOAuthClient } from 'angular-oauth2-oidc';
 
 import { routes } from './app.routes';
-import { authInterceptor } from './core/auth.interceptor';
-import { AuthService } from './core/auth.service';
+import { authInterceptor } from './core/auth/auth.interceptor';
+import { AuthService } from './core/auth/auth.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
+    // Los parametros de ruta (:id) llegan a las paginas como inputs.
+    provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withInterceptors([authInterceptor])),
 
     // allowedUrls limita a que hosts puede la libreria adjuntar el token.
-    // Con la lista vacia por defecto lo enviaria a cualquiera.
+    // Con la lista vacia por defecto lo enviaria a cualquiera. El token lo
+    // adjunta authInterceptor, por eso sendAccessToken queda en false.
     provideOAuthClient({
       resourceServer: {
         allowedUrls: ['/api'],
